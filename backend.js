@@ -43,7 +43,7 @@ app.get('/getItens', (req, res) => {
 app.get('/getMeusItens/:id', (req, res) => {
     let busca = {
         // idDono: new ObjectID(req.params.id)
-        idDono: req.params.id
+        dono: req.params.id
     };
 
     req.db.collection('itens')
@@ -54,6 +54,7 @@ app.get('/getMeusItens/:id', (req, res) => {
 });
 
 app.post('/item', (req, res) => {
+    console.log('CHEGOU O ITEM>>>>>>');
     console.log(req.body);
 
     let item = {
@@ -65,6 +66,7 @@ app.post('/item', (req, res) => {
         preco: req.body.preco,
         multa: req.body.multa,
         locador: req.body.locador,
+        dono: req.body.dono
     };
 
     if (!req.body.imagem || !req.body.nome || !req.body.descricao || !req.body.preco || !req.body.locador ) {
@@ -98,7 +100,9 @@ app.post('/login', (req, res) => {
         if(data){
             res.send(data);
         } else {
-            res.status(400).send({});
+            // TODO: use status, but this didnt work
+            // res.status(400).send({});
+            res.send({});
         }
     });
 });
