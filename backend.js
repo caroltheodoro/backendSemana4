@@ -41,7 +41,8 @@ app.get('/getItens', (req, res) => {
 //pega todos os itens de um determinado dono
 app.get('/getMeusItens/:id', (req, res) => {
     let busca = {
-        idDono: new ObjectID(req.params.id)
+        // idDono: new ObjectID(req.params.id)
+        idDono: req.params.id
     };
 
     req.db.collection('itens')
@@ -95,7 +96,12 @@ app.post('/cadastro', (req, res) => {
 
     req.db.collection('usuarios')
         .insert(usuario, (err, data) => {
-            res.send(data);
+            if(!err) {
+                res.send(data);
+            } else {
+                res.send(err);
+            }
+            
         });
 });
 
