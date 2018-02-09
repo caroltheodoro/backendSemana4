@@ -11,11 +11,10 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/', (req, res) => {
-    req.db.collection('clientes')
-    .find({})
+    req.db.collection('usuarios').find({})
     .toArray((err, data) => {
-        res.send(data);
-    });
+            res.send(data);
+        });
 });
 
 app.get('/cliente/:id', (req, res) => {
@@ -24,32 +23,37 @@ app.get('/cliente/:id', (req, res) => {
     };
 
     req.db.collection('objetos')
-    .findOne(busca, (err, data) => {
-        res.send(data);
-    });
+        .findOne(busca, (err, data) => {
+            res.send(data);
+        });
 });
 
-app.post('/.objetos', (req, res) => {
+app.post('/cadastro', (req, res) => {
     console.log(req.body);
+    res.send(req.body);
 
-    if(!req.usuario.id|| !req.usuario.cpf ||!req.usuario.telefone|| !req.usuario.nome || !req.usuario.username|| !req.usuario.foto){
-     
-        res.status(400).send({'error': 'Nome e email são obrigatórios'});
+    let usuario = {
+        nome,
+        cpf,
+        telefone,
+        username,
+        foto,
+        senha,
+        reputacao,
+        local = {lat, lng}
+    };
+
+    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto ) {
+        res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
         return;
     }
 
-    let objeto = {
-        nome:
-        email:
-        telefone:
-    }
-
-    req.db.collection('clientes')
-    .insert(cliente, (err, data) => {
-        res.send(data);
-    });
+    req.db.collection('usuarios')
+        .insert(req.body, (err, data) => {
+            res.send(data);
+        });
 });
 
 app.listen(3000, () => {
-    console.log('Servidor rodando na 3000'); 
+    console.log('Servidor rodando na 3000');
 });
