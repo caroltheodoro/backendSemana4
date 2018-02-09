@@ -29,37 +29,34 @@ app.get('/cliente/:id', (req, res) => {
         });
 });
 
-app.post('/cadastro', (req, res) => {
-    console.log(req.body);
-    res.send(req.body);
-
-    let usuario = {
-        nome: req.body.nome,
-        cpf: req.body.cpf,
-        telefone: req.body.telefone,
-        username: req.body.username,
-        foto: req.body.foto,
-        senha: "",
-        reputacao: -1,
-        //local = {lat, lng}
-    };
-
-    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto ) {
-        res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
-        return;
-    }
-
-     req.db.collection('usuarios')
-        .insert(req.body, (err, data) => {
+//pega o feed de itens
+//TODO receber localizacao como parametro
+app.get('/getItens', (req, res) => {
+    req.db.collection('itens')
+        .find({})
+        .toArray((err, data) => {
             res.send(data);
         });
 });
 
+//pega todos os itens de um determinado dono
+app.get('/getMeusItens/:id', (req, res) => {
+    let busca = {
+        // idDono: new ObjectID(req.params.id)
+        idDono: req.params.id
+    };
+
+    req.db.collection('itens')
+    .find(busca)
+    .toArray((err, data) => {
+        res.send(data);
+    });
+});
 
 app.post('/item', (req, res) => {
     console.log(req.body);
 
-    let Item = {
+    let item = {
         imagem: req.body.imagem,
         nome: req.body.nome,
         descricao: req.body.descricao,
@@ -76,8 +73,65 @@ app.post('/item', (req, res) => {
     }
 
     req.db.collection('itens')
-        .insert(req.body, (err, data) => {
+        .insert(item, (err, data) => {
+            if(err){
+                res.status(500).send({});
+            }
+
             res.send(data);
+        });
+});
+
+app.post('/login', (req, res) => {
+    if (!req.body.username || !req.body.senha) {
+        res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
+        return;
+    }
+
+    let busca = {
+        username: req.body.username,
+        senha: req.body.senha
+    }
+
+    req.db.collection('usuarios')
+    .findOne(busca, (err, data) => {
+        if(data){
+            res.send(data);
+        } else {
+            res.status(400).send({});
+        }
+    });
+});
+
+
+app.post('/cadastro', (req, res) => {
+    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto  || !req.body.senha || !req.body.local) {
+        res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
+        return;
+    }
+
+    let usuario = {
+        nome: req.body.nome,
+        cpf: req.body.cpf,
+        telefone: req.body.telefone,
+        username: req.body.username,
+        foto: req.body.foto,
+        senha: req.body.senha,
+        local: {
+            lat: req.body.local.lat,
+            lng: req.body.local.lng
+        },
+        reputacao: -1
+    };
+
+    req.db.collection('usuarios')
+        .insert(usuario, (err, data) => {
+            if(!err) {
+                res.send(data);
+            } else {
+                res.send(err);
+            }
+            
         });
 });
 
