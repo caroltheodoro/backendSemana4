@@ -28,6 +28,51 @@ app.get('/cliente/:id', (req, res) => {
         });
 });
 
+//pega o feed de itens
+//TODO receber localizacao como parametro
+app.get('/getItens', (req, res) => {
+    req.db.collection('itens')
+        .find({})
+        .toArray((err, data) => {
+            res.send(data);
+        });
+});
+
+//pega todos os itens de um determinado dono
+app.get('/getMeusItens/:id', (req, res) => {
+    let busca = {
+        idDono: new ObjectID(req.params.id)
+    };
+
+    req.db.collection('itens')
+    .find(busca)
+    .toArray((err, data) => {
+        res.send(data);
+    });
+});
+
+app.post('/login', (req, res) => {
+    if (!req.body.username || !req.body.senha) {
+        res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
+        return;
+    }
+
+    let busca = {
+        username: req.body.username,
+        senha: req.body.senha
+    }
+
+    req.db.collection('usuarios')
+    .findOne(busca, (err, data) => {
+        if(data){
+            res.send(data);
+        } else {
+            res.send({});
+        }
+    });
+});
+
+
 app.post('/cadastro', (req, res) => {
     if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto  || !req.body.senha || !req.body.local) {
         res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
