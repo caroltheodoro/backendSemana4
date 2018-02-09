@@ -29,27 +29,27 @@ app.get('/cliente/:id', (req, res) => {
 });
 
 app.post('/cadastro', (req, res) => {
-    console.log(req.body);
-    res.send(req.body);
-
-    let usuario = {
-        nome,
-        cpf,
-        telefone,
-        username,
-        foto,
-        senha,
-        reputacao,
-        local = {lat, lng}
-    };
-
-    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto ) {
+    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto  || !req.body.senha || !req.body.local) {
         res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
         return;
     }
 
+    let usuario = {
+        nome: req.body.nome,
+        cpf: req.body.cpf,
+        telefone: req.body.telefone,
+        username: req.body.username,
+        foto: req.body.foto,
+        senha: req.body.senha,
+        local: {
+            lat: req.body.local.lat,
+            lng: req.body.local.lng
+        },
+        reputacao: -1
+    };
+
     req.db.collection('usuarios')
-        .insert(req.body, (err, data) => {
+        .insert(usuario, (err, data) => {
             res.send(data);
         });
 });
