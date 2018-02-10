@@ -11,6 +11,7 @@ const app = express();
 
 const upload = multer(); // for parsing multipart/form-data
 
+app.use(express.static('upload'));
 app.use(expressMongoDb('mongodb://localhost/backendSemana4'));
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,16 +23,16 @@ app.get('/', (req, res) => {
         });
 });
 
-app.post('/testFormData', upload.array(), function(req, res) {
+app.post('/imgUpload', upload.array(), function(req, res) {
     let base64Data = req.body.testdot;
     console.log('writing file...', base64Data);
     fs.writeFile(__dirname + "/upload/out.png", base64Data, 'base64', function(err) {
         if (err) console.log(err);
-        fs.readFile(__dirname + "/upload/out.png", function(err, data) {
-            if (err) throw err;
-            console.log('reading file...', data.toString('base64'));
-            res.send(data);
-        });
+        // fs.readFile(__dirname + "/upload/out.png", function(err, data) {
+        //     if (err) throw err;
+        //     console.log('reading file...', data.toString('base64'));
+        //     res.send(data);
+        // });
     });
 });
 
@@ -71,7 +72,6 @@ app.get('/getMeusItens/:id', (req, res) => {
 });
 
 app.post('/item', (req, res) => {
-    console.log('CHEGOU O ITEM>>>>>>');
     console.log(req.body);
 
     let item = {
