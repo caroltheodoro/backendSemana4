@@ -1,11 +1,15 @@
 
 const express = require('express');
+const fs = require('fs');
 const expressMongoDb = require('express-mongo-db');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const ObjectID = require('mongodb').ObjectID;
+const multer = require('multer');
 
 const app = express();
+
+const upload = multer(); // for parsing multipart/form-data
 
 app.use(expressMongoDb('mongodb://localhost/backendSemana4'));
 app.use(bodyParser.json());
@@ -16,6 +20,19 @@ app.get('/', (req, res) => {
     .toArray((err, data) => {
             res.send(data);
         });
+});
+
+app.post('/testFormData', upload.array(), function(req, res) {
+    let base64Data = req.body.testdot;
+    console.log('writing file...', base64Data);
+    fs.writeFile(__dirname + "/upload/out.png", base64Data, 'base64', function(err) {
+        if (err) console.log(err);
+        fs.readFile(__dirname + "/upload/out.png", function(err, data) {
+            if (err) throw err;
+            console.log('reading file...', data.toString('base64'));
+            res.send(data);
+        });
+    });
 });
 
 app.get('/cliente/:id', (req, res) => {
