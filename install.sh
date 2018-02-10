@@ -24,4 +24,10 @@ sudo -u root npm install pm2 -g
 sudo -u root npm install
 
 #opens vim to configure the reverse proxy 
-sudo -u root vim /etc/nginx/nginx.conf
+#sudo -u root vim /etc/nginx/nginx.conf
+
+#starts mongod service
+sudo -u root service mongod start
+
+#starts node backend process
+sudo -u root pm2 start backend.js
