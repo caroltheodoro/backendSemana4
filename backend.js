@@ -57,7 +57,7 @@ app.get('/getItens', (req, res) => {
                 // SEND TREATED ITEM LIST
                 // TODO: make front end just link images to owners
                 // and not send redundant data
-                res.send(item);
+                res.send(itemData);
             });
         });
 });
