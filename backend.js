@@ -43,9 +43,9 @@ app.get('/getItens', (req, res) => {
 
                 //TODO OPTIMIZE THIS
                 //SHOULD NOT BE HARD
-                for(item in itemData) {
+                for(item of itemData) {
                     flag = true;
-                    for(user in userData) {
+                    for(user of userData) {
                         if(flag == true && item.dono == user.username) {
                             //this should only happen once
                             item.dono = user;
