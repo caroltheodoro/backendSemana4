@@ -46,7 +46,7 @@ app.get('/getItens', (req, res) => {
                 for(item in itemData) {
                     flag = true;
                     for(user in userData) {
-                        if(flat == true && item.dono == user.username) {
+                        if(flag == true && item.dono == user.username) {
                             //this should only happen once
                             item.dono = user;
                             flag = false;
