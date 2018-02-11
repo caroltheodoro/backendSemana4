@@ -31,3 +31,7 @@ sudo -u root service mongod start
 
 #starts node backend process
 sudo -u root pm2 start backend.js
+
+#creates our unique indexes on the db
+#check if this works
+#sudo -u root mongo && db.usuarios.createIndex({username :1}, {unique : true} )                                                                                                                                                            
