@@ -9,7 +9,7 @@ const ObjectID = require('mongodb').ObjectID;
 const app = express();
 
 app.use(expressMongoDb('mongodb://localhost/backendSemana4'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb'}));
 app.use(cors());
 
 app.get('/', (req, res) => {
