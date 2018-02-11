@@ -1,4 +1,3 @@
-
 const express = require('express');
 const fs = require('fs');
 const expressMongoDb = require('express-mongo-db');
@@ -33,10 +32,33 @@ app.get('/cliente/:id', (req, res) => {
 //pega o feed de itens
 //TODO receber localizacao como parametro
 app.get('/getItens', (req, res) => {
+    //CHANGE THIS TO USE PROMISES
     req.db.collection('itens')
         .find({})
-        .toArray((err, data) => {
-            res.send(data);
+        .toArray((err, itemData) => {
+            req.db.collection('usuarios')
+            .find({})
+            .toArray((err, userData) => {
+                let flag = true;
+
+                //TODO OPTIMIZE THIS
+                //SHOULD NOT BE HARD
+                for(item in itemData) {
+                    flag = true;
+                    for(user in userData) {
+                        if(flat == true && item.dono == user.username) {
+                            //this should only happen once
+                            item.dono = user;
+                            flag = false;
+                        }
+                    }
+                }
+
+                // SEND TREATED ITEM LIST
+                // TODO: make front end just link images to owners
+                // and not send redundant data
+                res.send(item);
+            });
         });
 });
 
