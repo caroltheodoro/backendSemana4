@@ -4,16 +4,18 @@ const expressMongoDb = require('express-mongo-db');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const ObjectID = require('mongodb').ObjectID;
+const events = require('events');
+
 
 const app = express();
 
 app.use(expressMongoDb('mongodb://localhost/backendSemana4'));
-app.use(bodyParser.json({ limit: '50mb'}));
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
 
 app.get('/', (req, res) => {
     req.db.collection('usuarios').find({})
-    .toArray((err, data) => {
+        .toArray((err, data) => {
             res.send(data);
         });
 });
@@ -37,28 +39,28 @@ app.get('/getItens', (req, res) => {
         .find({})
         .toArray((err, itemData) => {
             req.db.collection('usuarios')
-            .find({})
-            .toArray((err, userData) => {
-                let flag = true;
+                .find({})
+                .toArray((err, userData) => {
+                    let flag = true;
 
-                //TODO OPTIMIZE THIS
-                //SHOULD NOT BE HARD
-                for(item of itemData) {
-                    flag = true;
-                    for(user of userData) {
-                        if(flag == true && item.dono == user.username) {
-                            //this should only happen once
-                            item.dono = user;
-                            flag = false;
+                    //TODO OPTIMIZE THIS
+                    //SHOULD NOT BE HARD
+                    for (item of itemData) {
+                        flag = true;
+                        for (user of userData) {
+                            if (flag == true && item.dono == user.username) {
+                                //this should only happen once
+                                item.dono = user;
+                                flag = false;
+                            }
                         }
                     }
-                }
 
-                // SEND TREATED ITEM LIST
-                // TODO: make front end just link images to owners
-                // and not send redundant data
-                res.send(itemData);
-            });
+                    // SEND TREATED ITEM LIST
+                    // TODO: make front end just link images to owners
+                    // and not send redundant data
+                    res.send(itemData);
+                });
         });
 });
 
@@ -70,10 +72,10 @@ app.get('/getMeusItens/:id', (req, res) => {
     };
 
     req.db.collection('itens')
-    .find(busca)
-    .toArray((err, data) => {
-        res.send(data);
-    });
+        .find(busca)
+        .toArray((err, data) => {
+            res.send(data);
+        });
 });
 
 app.post('/item', (req, res) => {
@@ -91,14 +93,14 @@ app.post('/item', (req, res) => {
         dono: req.body.dono
     };
 
-    if (!req.body.imagem || !req.body.nome || !req.body.descricao || !req.body.preco || !req.body.locador ) {
+    if (!req.body.imagem || !req.body.nome || !req.body.descricao || !req.body.preco || !req.body.locador) {
         res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
         return;
     }
 
     req.db.collection('itens')
         .insert(item, (err, data) => {
-            if(err){
+            if (err) {
                 res.status(500).send({});
             }
 
@@ -118,20 +120,19 @@ app.post('/login', (req, res) => {
     }
 
     req.db.collection('usuarios')
-    .findOne(busca, (err, data) => {
-        if(data){
-            res.send(data);
-        } else {
-            // TODO: use status, but this didnt work
-            // res.status(400).send({});
-            res.send({});
-        }
-    });
+        .findOne(busca, (err, data) => {
+            if (data) {
+                res.send(data);
+            } else {
+                // TODO: use status, but this didnt work
+                // res.status(400).send({});
+                res.send({});
+            }
+        });
 });
 
-
 app.post('/cadastro', (req, res) => {
-    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto  || !req.body.senha || !req.body.local) {
+    if (!req.body.cpf || !req.body.telefone || !req.body.nome || !req.body.username || !req.body.foto || !req.body.senha || !req.body.local) {
         res.status(400).send({ 'error': 'Preencha todos os campos obrigatorios' });
         return;
     }
@@ -152,15 +153,101 @@ app.post('/cadastro', (req, res) => {
 
     req.db.collection('usuarios')
         .insert(usuario, (err, data) => {
-            if(!err) {
+            if (!err) {
                 res.send(data);
             } else {
                 res.send(err);
             }
-            
+
         });
 });
 
+
+// aqui comeca o sistema de armarios
+app.get('/:uid/:armarioID', function (req, res) {
+    console.log(req.params.uid);
+    res.send('OK');
+
+    busca = {
+        armarioID: req.params.armarioID
+    }
+    objetoVazio = {
+        armarioID: req.params.armarioID,
+        uid: '',
+        requestLeitura: false
+    }
+
+    objetoNovo = {
+        armarioID: req.params.armarioID,
+        uid: req.params.uid,
+        requestLeitura: false
+
+    }
+
+    req.db.collection('armarios').findOne(busca, (err, data) => {
+        if (data) {
+            if (data.requestLeitura) {
+                req.db.collection('armarios').update(busca, objetoNovo, (err, data) => {
+                    console.log("UID atualizado");
+                });
+            }
+        } else {
+            req.db.collection('armarios').insert(objetoVazio, (err, data) => {
+                console.log("added obejtoVazio");
+            });
+        }
+        console.log("fudeu");
+    })
+
+
+});
+
+app.post('/requestArmario', (req, res) => {
+
+    busca = {
+        armarioID: body.parse.totemId
+    }
+
+    req.db.collection('armarios')
+        .findOne(busca, (err, data) => {
+            if (data) {
+                req.db.collection('armarios')
+                    .update(busca, { "armarioID": data.armarioID, "uid": data.uid, requestLeitura: true }, (err, data) => {
+
+                        res.send(data.uid);
+                    });
+            } else {
+                console.log("se fudeu");
+            }
+        });
+
+});
+
+app.post('/disableItem', (req, res) => {
+
+    busca = {
+        armarioID: body.parse.totemId
+    }
+
+
+
+    req.db.collection('armarios')
+        .findOne(busca, (err, data) => {
+            if (data) {
+                req.db.collection('armarios')
+                    .update(busca, { "armarioID": data.armarioID, "uid": '', requestLeitura: false }, (err, data) => {
+
+
+                    });
+            } else {
+
+
+            }
+
+            res.send(data);
+        });
+
+});
 
 app.listen(3000, () => {
     console.log('Servidor rodando na 3000');
